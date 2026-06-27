@@ -204,6 +204,6 @@ flowchart TD
 
 ## Author
 
-Vincent (Bast) Herrera · [github.com/TheRealBastioul](https://github.com/TheRealBastioul) · [dimensionbeyond.space](https://dimensionbeyond.space)
+Vincent (Bast) Herrera · [github.com/TheRealBastioul](https://github.com/TheRealBastioul)
 
 *WGU B.S. Cybersecurity and Information Assurance — C769 IT Capstone*
