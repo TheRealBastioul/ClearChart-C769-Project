@@ -13,8 +13,8 @@ A proof of concept comparing three PII protection approaches applied to syntheti
 **Step 1 - Clone the repository and install dependencies**
 
 ```bash
-git clone https://github.com/TheRealBastioul/clearchart.git
-cd clearchart
+git clone https://github.com/TheRealBastioul/ClearChart-C769-Project.git
+cd ClearChart-C769-Project
 pip install flask
 ```
 
@@ -164,30 +164,30 @@ flowchart TD
 
     V1Q["Query layered_vault1.db
     WHERE last_name_plain = input
-    AND last4_ssn_hash = SHA256 of input"]
+    AND last4_ssn_hash = SHA-256 of input"]
 
     V1R["Retrieve last4_ssn_token"]
 
     LDBQ["Query layered_link.db
-    WHERE last4_ssn_token = token from Vault 1"]
+    WHERE last4_ssn_token = token from layered_vault1.db"]
 
     LDBR["Retrieve patient_id_token + dob_plain"]
 
     V2Q["Query layered_vault2.db
-    WHERE patient_id_token = token from Link DB"]
+    WHERE patient_id_token = token from layered_link.db"]
 
     ASSEMBLE["Full record assembled
-    last_name: vault1.db
-    dob: link.db
-    ssn + mrn + first_name: Vault 2"]
+    last_name: layered_vault1.db
+    dob: layered_link.db
+    ssn + mrn + first_name: layered_vault2.db"]
 
     USER --> V1Q --> V1R --> LDBQ --> LDBR --> V2Q --> ASSEMBLE
 ```
 
 **Breach exposure per database:**
-- Vault 1: last name + partial SSN hash only
-- Link DB: DOB + opaque tokens, no name or SSN
-- Vault 2: SSN + MRN + first name, dead end without link.db token
+- layered_vault1.db: last name + partial SSN hash only
+- layered_link.db: DOB + opaque tokens, no name or SSN
+- layered_vault2.db: SSN + MRN + first name, dead end without layered_link.db token
 
 ---
 
@@ -206,4 +206,4 @@ flowchart TD
 
 Vincent (Bast) Herrera · [github.com/TheRealBastioul](https://github.com/TheRealBastioul) · [dimensionbeyond.space](https://dimensionbeyond.space)
 
-*WGU B.S. Cybersecurity and Information Assurance - C769 IT Capstone*
+*WGU B.S. Cybersecurity and Information Assurance — C769 IT Capstone*
