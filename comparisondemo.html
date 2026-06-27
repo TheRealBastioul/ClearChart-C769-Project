@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearChart — Pipeline Security Comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #ffffff;
+      --surface:  #f7f7f5;
+      --border:   #e4e4e0;
+      --text:     #1a1a18;
+      --mid:      #4a4a46;
+      --dim:      #8a8a84;
+
+      --red:        #c0392b;
+      --red-bg:     #fdf2f1;
+      --red-border: #e8c4c0;
+
+      --amber:        #b45309;
+      --amber-bg:     #fdf8f0;
+      --amber-border: #e8d9b8;
+
+      --green:        #166534;
+      --green-bg:     #f0faf4;
+      --green-border: #b8dfc8;
+
+      --blue:        #1d4ed8;
+      --blue-bg:     #eff6ff;
+      --blue-border: #bfdbfe;
+
+      --sans:  'DM Sans', sans-serif;
+      --serif: 'Fraunces', serif;
+      --mono:  'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 3rem 2rem 4rem;
+    }
+
+    .page { max-width: 1140px; margin: 0 auto; }
+
+    .header { margin-bottom: 0.5rem; }
+    .header-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 0.6rem;
+    }
+    .header h1 {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    .header-sub {
+      font-size: 0.9rem;
+      color: var(--mid);
+      margin-top: 0.4rem;
+      font-weight: 300;
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+
+    .threat-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--text);
+      border-radius: 4px;
+      padding: 0.9rem 1.1rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--mid);
+      margin-bottom: 2.5rem;
+    }
+    .threat-bar strong {
+      color: var(--text);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.68rem;
+    }
+
+    /* Pipeline section — full width stacked rows */
+    .pipeline-section {
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .pipeline-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .pipeline-header.red   { background: var(--red-bg); }
+    .pipeline-header.amber { background: var(--amber-bg); }
+    .pipeline-header.green { background: var(--green-bg); }
+
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-red   { background: var(--red); }
+    .dot-amber { background: var(--amber); }
+    .dot-green { background: var(--green); }
+
+    .pipeline-header-text h2 {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .pipeline-header-text p { font-size: 0.75rem; color: var(--dim); font-family: var(--mono); }
+
+    .verdict-pill {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .pill-red   { background: var(--red-border);   color: var(--red); }
+    .pill-amber { background: var(--amber-border);  color: var(--amber); }
+    .pill-green { background: var(--green-border); color: var(--green); }
+
+    /* Diagram row — full width */
+    .diagram-row {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .diagram-row-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Attacker view row — full width */
+    .attacker-row {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .attacker-row-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+    .field-row:last-child { border-bottom: none; }
+    .field-cat { color: var(--mid); min-width: 80px; flex-shrink: 0; font-weight: 500; }
+    .field-items { color: var(--text); flex: 1; }
+
+    .field-tag {
+      font-size: 0.6rem;
+      font-family: var(--mono);
+      font-weight: 500;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tag-crack { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+    .tag-plain { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+    .tag-token { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border); }
+    .tag-hash  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+
+    /* Analysis block */
+    .analysis-block {
+      padding: 1rem 1.5rem;
+      background: var(--surface);
+      font-size: 0.8rem;
+      color: var(--mid);
+      line-height: 1.7;
+    }
+    .analysis-block.red   { border-left: 3px solid var(--red); }
+    .analysis-block.amber { border-left: 3px solid var(--amber); }
+    .analysis-block.green { border-left: 3px solid var(--green); }
+
+    /* Layered attacker view — 3 sub-sections side by side */
+    .layered-attacker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .layered-db-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Summary table */
+    .summary-section { margin-top: 0.5rem; }
+    .summary-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 1rem;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-align: left;
+      padding: 0.6rem 1rem;
+      border-bottom: 2px solid var(--border);
+      background: var(--surface);
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--mid);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: var(--text); font-weight: 500; }
+
+    .tpill {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+    .tpill-red   { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+    .tpill-amber { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-border); }
+    .tpill-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .tpill-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <p class="header-eyebrow">ClearChart PII Protection Architecture — Appendix B</p>
+    <h1>Pipeline Security<br><em>Comparison</em></h1>
+    <p class="header-sub">What an attacker recovers from each database in isolation</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="threat-bar">
+    <strong>Threat Model</strong>
+    Attacker has breached one application-layer database. No prior knowledge of any patient record. What can they recover?
+  </div>
+
+  <!-- ═══ PIPELINE 1: HASHING ═══ -->
+  <div class="pipeline-section">
+    <div class="pipeline-header red">
+      <div class="status-dot dot-red"></div>
+      <div class="pipeline-header-text">
+        <h2>Direct Hashing Pipeline</h2>
+        <p><strong>hashing.db</strong> — single database, all fields hashed with SHA-256</p>
+      </div>
+      <span class="verdict-pill pill-red">Vulnerable</span>
+    </div>
+
+    <div class="diagram-row">
+      <div class="diagram-row-label">Data flow &amp; storage</div>
+      <svg viewBox="0 0 900 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:120px">
+        <defs>
+          <marker id="h-arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#8a8a84"/>
+          </marker>
+          <marker id="h-arr-red" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#c0392b"/>
+          </marker>
+        </defs>
+
+        <!-- Patient Input -->
+        <rect x="10" y="20" width="150" height="80" rx="5" fill="#fdf2f1" stroke="#e8c4c0" stroke-width="1.5"/>
+        <text x="85" y="52" text-anchor="middle" font-family="Space Grotesk" font-size="10" font-weight="500" fill="#4a4a46">Patient Input</text>
+        <text x="85" y="68" text-anchor="middle" font-family="Space Grotesk" font-size="9" fill="#8a8a84">name · DOB</text>
+        <text x="85" y="82" text-anchor="middle" font-family="Space Grotesk" font-size="9" fill="#8a8a84">SSN · MRN</text>
+
+        <!-- Arrow -->
+        <line x1="160" y1="60" x2="210" y2="60" stroke="#8a8a84" stroke-width="1.5" marker-end="url(#h-arr)"/>
+        <text x="185" y="54" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#8a8a84">SHA-256</text>
+        <text x="185" y="74" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#8a8a84">each field</text>
+
+        <!-- hashing.db -->
+        <rect x="215" y="10" width="380" height="100" rx="5" fill="#fff" stroke="#e8c4c0" stroke-width="1.5"/>
+        <rect x="215" y="10" width="380" height="22" rx="5" fill="#fdf2f1" stroke="#e8c4c0" stroke-width="1.5"/>
+        <text x="405" y="26" text-anchor="middle" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#c0392b">hashing.db</text>
+        <!-- Row 1 -->
+        <text x="230" y="50" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">mrn_hash</text>
+        <text x="320" y="50" font-family="Space Grotesk" font-size="8.5" fill="#4a4a46">a3f8c2d1e9b7...</text>
+        <text x="230" y="66" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">first_name_hash</text>
+        <text x="320" y="66" font-family="Space Grotesk" font-size="8.5" fill="#4a4a46">b7e4a9f2c1d6...</text>
+        <text x="230" y="82" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">last_name_hash</text>
+        <text x="320" y="82" font-family="Space Grotesk" font-size="8.5" fill="#4a4a46">c1d6b3e8f5a2...</text>
+        <!-- Row 2 -->
+        <text x="460" y="50" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">dob_hash</text>
+        <text x="530" y="50" font-family="Space Grotesk" font-size="8.5" fill="#4a4a46">f2a7c4d9e1b3...</text>
+        <text x="460" y="66" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">ssn_hash</text>
+        <text x="530" y="66" font-family="Space Grotesk" font-size="8.5" fill="#4a4a46">e9b1f5a3c7d2...</text>
+        <text x="460" y="98" font-family="Space Grotesk" font-size="8" font-style="italic" fill="#c0392b">no patient_id — no direct linkage</text>
+
+        <!-- Arrow to attack -->
+        <line x1="595" y1="60" x2="645" y2="60" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#h-arr-red)"/>
+
+        <!-- Attack result -->
+        <rect x="650" y="20" width="240" height="80" rx="5" fill="#fdf2f1" stroke="#c0392b" stroke-width="1.5"/>
+        <text x="770" y="48" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="500" fill="#c0392b">⚠ Pre-computation attack</text>
+        <text x="770" y="64" text-anchor="middle" font-family="Space Grotesk" font-size="8.5" fill="#c0392b">recovers full SSN in &lt;1 second</text>
+        <text x="770" y="80" text-anchor="middle" font-family="Space Grotesk" font-size="8.5" fill="#c0392b">zero prior knowledge required</text>
+      </svg>
+    </div>
+
+    <div class="attacker-row">
+      <div class="attacker-row-label">What the attacker sees</div>
+      <div class="field-row">
+        <span class="field-cat">Hashes</span>
+        <span class="field-items">mrn_hash, first_name_hash, last_name_hash, dob_hash, ssn_hash</span>
+        <span class="field-tag tag-crack">crackable</span>
+      </div>
+    </div>
+
+    <div class="analysis-block red">
+      Every field is a SHA-256 hash of the original value. SSNs are low-entropy — the constrained synthetic SSN format yields 90 million candidates enumerable in seconds with no prior knowledge. No patient_id means no direct record linkage, but the hash itself is the vulnerability. Once any field is recovered the attacker can cross-reference against public records.
+    </div>
+  </div>
+
+  <!-- ═══ PIPELINE 2: TOKENIZATION ═══ -->
+  <div class="pipeline-section">
+    <div class="pipeline-header amber">
+      <div class="status-dot dot-amber"></div>
+      <div class="pipeline-header-text">
+        <h2>Tokenization Pipeline</h2>
+        <p><strong>token_vault.db</strong> — CSPRNG tokens alongside plaintext originals, single database</p>
+      </div>
+      <span class="verdict-pill pill-amber">Vault-Dependent</span>
+    </div>
+
+    <div class="diagram-row">
+      <div class="diagram-row-label">Data flow &amp; storage</div>
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:140px">
+        <defs>
+          <marker id="t-arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#8a8a84"/>
+          </marker>
+          <marker id="t-arr-amber" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#b45309"/>
+          </marker>
+        </defs>
+
+        <!-- Patient Input -->
+        <rect x="10" y="20" width="150" height="100" rx="5" fill="#fdf8f0" stroke="#e8d9b8" stroke-width="1.5"/>
+        <text x="85" y="52" text-anchor="middle" font-family="Space Grotesk" font-size="10" font-weight="500" fill="#4a4a46">Patient Input</text>
+        <text x="85" y="68" text-anchor="middle" font-family="Space Grotesk" font-size="9" fill="#8a8a84">name · DOB</text>
+        <text x="85" y="84" text-anchor="middle" font-family="Space Grotesk" font-size="9" fill="#8a8a84">SSN · MRN</text>
+        <text x="85" y="100" text-anchor="middle" font-family="Space Grotesk" font-size="9" fill="#8a8a84">patient_id</text>
+
+        <!-- Arrow -->
+        <line x1="160" y1="70" x2="210" y2="70" stroke="#8a8a84" stroke-width="1.5" marker-end="url(#t-arr)"/>
+        <text x="185" y="64" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#8a8a84">CSPRNG</text>
+        <text x="185" y="80" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#8a8a84">per field</text>
+
+        <!-- token_vault.db -->
+        <rect x="215" y="10" width="460" height="120" rx="5" fill="#fff" stroke="#e8d9b8" stroke-width="1.5"/>
+        <rect x="215" y="10" width="460" height="22" rx="5" fill="#fdf8f0" stroke="#e8d9b8" stroke-width="1.5"/>
+        <text x="445" y="26" text-anchor="middle" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#b45309">token_vault.db</text>
+
+        <!-- Tokens col -->
+        <text x="230" y="48" font-family="Space Grotesk" font-size="8" fill="#1d4ed8" font-weight="500">TOKENS</text>
+        <text x="230" y="62" font-family="Space Grotesk" font-size="8" fill="#8a8a84">mrn_token</text><text x="320" y="62" font-family="Space Grotesk" font-size="8" fill="#4a4a46">a8f3c2...</text>
+        <text x="230" y="76" font-family="Space Grotesk" font-size="8" fill="#8a8a84">first_name_token</text><text x="320" y="76" font-family="Space Grotesk" font-size="8" fill="#4a4a46">b4e9f7...</text>
+        <text x="230" y="90" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last_name_token</text><text x="320" y="90" font-family="Space Grotesk" font-size="8" fill="#4a4a46">c1d3a8...</text>
+        <text x="230" y="104" font-family="Space Grotesk" font-size="8" fill="#8a8a84">dob_token</text><text x="320" y="104" font-family="Space Grotesk" font-size="8" fill="#4a4a46">d9f2b1...</text>
+        <text x="230" y="118" font-family="Space Grotesk" font-size="8" fill="#8a8a84">ssn_token</text><text x="320" y="118" font-family="Space Grotesk" font-size="8" fill="#4a4a46">e7a4c3...</text>
+
+        <!-- Divider -->
+        <line x1="400" y1="35" x2="400" y2="122" stroke="#e8d9b8" stroke-width="1" stroke-dasharray="3 2"/>
+
+        <!-- Originals col -->
+        <text x="415" y="48" font-family="Space Grotesk" font-size="8" fill="#c0392b" font-weight="500">ORIGINALS (PLAINTEXT)</text>
+        <text x="415" y="62" font-family="Space Grotesk" font-size="8" fill="#8a8a84">mrn_original</text><text x="510" y="62" font-family="Space Grotesk" font-size="8" fill="#c0392b">654321</text>
+        <text x="415" y="76" font-family="Space Grotesk" font-size="8" fill="#8a8a84">first_name_original</text><text x="510" y="76" font-family="Space Grotesk" font-size="8" fill="#c0392b">Jane</text>
+        <text x="415" y="90" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last_name_original</text><text x="510" y="90" font-family="Space Grotesk" font-size="8" fill="#c0392b">Doe</text>
+        <text x="415" y="104" font-family="Space Grotesk" font-size="8" fill="#8a8a84">dob_original</text><text x="510" y="104" font-family="Space Grotesk" font-size="8" fill="#c0392b">1982-06-14</text>
+        <text x="415" y="118" font-family="Space Grotesk" font-size="8" fill="#8a8a84">ssn_original</text><text x="510" y="118" font-family="Space Grotesk" font-size="8" fill="#c0392b">900-42-1234</text>
+
+        <!-- Arrow to result -->
+        <line x1="675" y1="70" x2="720" y2="70" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#t-arr-amber)"/>
+
+        <!-- Result -->
+        <rect x="725" y="20" width="165" height="100" rx="5" fill="#fdf8f0" stroke="#b45309" stroke-width="1.5"/>
+        <text x="807" y="52" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="500" fill="#b45309">⚠ Vault breach</text>
+        <text x="807" y="68" text-anchor="middle" font-family="Space Grotesk" font-size="8.5" fill="#b45309">= total exposure</text>
+        <text x="807" y="86" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#b45309">read _original columns</text>
+        <text x="807" y="100" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#b45309">no cracking required</text>
+      </svg>
+    </div>
+
+    <div class="attacker-row">
+      <div class="attacker-row-label">What the attacker sees</div>
+      <div class="field-row">
+        <span class="field-cat">Tokens</span>
+        <span class="field-items">mrn_token, first_name_token, last_name_token, dob_token, ssn_token</span>
+        <span class="field-tag tag-token">not crackable</span>
+      </div>
+      <div class="field-row">
+        <span class="field-cat">Plaintext</span>
+        <span class="field-items">patient_id, mrn_original, first_name_original, last_name_original, dob_original, ssn_original</span>
+        <span class="field-tag tag-plain">plaintext</span>
+      </div>
+    </div>
+
+    <div class="analysis-block amber">
+      CSPRNG tokens are not crackable — 256 bits of entropy with no structural relationship to the original value. However, the vault stores plaintext originals alongside every token. A breach of token_vault.db directly exposes all patient data with no cryptographic attack required. The attacker simply reads the _original columns. Security relies entirely on vault isolation.
+    </div>
+  </div>
+
+  <!-- ═══ PIPELINE 3: LAYERED ═══ -->
+  <div class="pipeline-section">
+    <div class="pipeline-header green">
+      <div class="status-dot dot-green"></div>
+      <div class="pipeline-header-text">
+        <h2>Layered Architecture Pipeline</h2>
+        <p><strong>layered_vault1.db</strong> · <strong>layered_link.db</strong> · <strong>layered_vault2.db</strong> — three physically isolated databases</p>
+      </div>
+      <span class="verdict-pill pill-green">Recommended</span>
+    </div>
+
+    <div class="diagram-row">
+      <div class="diagram-row-label">Data flow &amp; storage — left to right traversal chain</div>
+      <svg viewBox="0 0 1000 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:150px">
+        <defs>
+          <marker id="l-arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#166534"/>
+          </marker>
+          <marker id="l-arr-g" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#8a8a84"/>
+          </marker>
+        </defs>
+
+        <!-- Patient Input -->
+        <rect x="5" y="20" width="120" height="110" rx="5" fill="#f0faf4" stroke="#b8dfc8" stroke-width="1.5"/>
+        <text x="65" y="42" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="500" fill="#4a4a46">Patient Input</text>
+        <text x="65" y="58" text-anchor="middle" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">name · DOB</text>
+        <text x="65" y="72" text-anchor="middle" font-family="Space Grotesk" font-size="8.5" fill="#8a8a84">SSN · MRN</text>
+
+        <!-- Arrow to Vault 1 -->
+        <line x1="125" y1="75" x2="158" y2="75" stroke="#8a8a84" stroke-width="1.5" marker-end="url(#l-arr-g)"/>
+
+        <!-- Vault 1 -->
+        <rect x="163" y="10" width="210" height="130" rx="5" fill="#fff" stroke="#b8dfc8" stroke-width="1.5"/>
+        <rect x="163" y="10" width="210" height="22" rx="5" fill="#f0faf4" stroke="#b8dfc8" stroke-width="1.5"/>
+        <text x="268" y="26" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#166534">layered_vault1.db</text>
+        <text x="178" y="48" font-family="Space Grotesk" font-size="8" fill="#4a4a46" font-weight="500">Plaintext</text>
+        <text x="178" y="62" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last_name_plain</text><text x="270" y="62" font-family="Space Grotesk" font-size="8" fill="#c0392b">Doe</text>
+        <text x="178" y="80" font-family="Space Grotesk" font-size="8" fill="#b45309" font-weight="500">Hash</text>
+        <text x="178" y="94" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last4_ssn_hash</text><text x="270" y="94" font-family="Space Grotesk" font-size="8" fill="#4a4a46">f3a9c2...</text>
+        <text x="178" y="112" font-family="Space Grotesk" font-size="8" fill="#1d4ed8" font-weight="500">Tokens</text>
+        <text x="178" y="126" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last_name_token · last4_ssn_token</text>
+
+        <!-- Arrow to Link DB -->
+        <line x1="373" y1="75" x2="406" y2="75" stroke="#166534" stroke-width="1.5" marker-end="url(#l-arr)"/>
+        <text x="390" y="68" text-anchor="middle" font-family="Space Grotesk" font-size="7.5" fill="#166534">last4_ssn</text>
+        <text x="390" y="84" text-anchor="middle" font-family="Space Grotesk" font-size="7.5" fill="#166534">_token →</text>
+
+        <!-- Link DB -->
+        <rect x="411" y="10" width="220" height="130" rx="5" fill="#fff" stroke="#b8dfc8" stroke-width="1.5"/>
+        <rect x="411" y="10" width="220" height="22" rx="5" fill="#f0faf4" stroke="#b8dfc8" stroke-width="1.5"/>
+        <text x="521" y="26" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#166534">layered_link.db</text>
+        <text x="426" y="48" font-family="Space Grotesk" font-size="8" fill="#4a4a46" font-weight="500">Plaintext</text>
+        <text x="426" y="62" font-family="Space Grotesk" font-size="8" fill="#8a8a84">dob_plain</text><text x="510" y="62" font-family="Space Grotesk" font-size="8" fill="#c0392b">1982-06-14</text>
+        <text x="426" y="80" font-family="Space Grotesk" font-size="8" fill="#b45309" font-weight="500">Hash</text>
+        <text x="426" y="94" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last4_ssn_hash</text><text x="510" y="94" font-family="Space Grotesk" font-size="8" fill="#4a4a46">f3a9c2...</text>
+        <text x="426" y="112" font-family="Space Grotesk" font-size="8" fill="#1d4ed8" font-weight="500">Tokens</text>
+        <text x="426" y="126" font-family="Space Grotesk" font-size="8" fill="#8a8a84">last4_ssn_token · patient_id_token</text>
+
+        <!-- Arrow to Vault 2 -->
+        <line x1="631" y1="75" x2="664" y2="75" stroke="#166534" stroke-width="1.5" marker-end="url(#l-arr)"/>
+        <text x="648" y="68" text-anchor="middle" font-family="Space Grotesk" font-size="7.5" fill="#166534">patient_id</text>
+        <text x="648" y="84" text-anchor="middle" font-family="Space Grotesk" font-size="7.5" fill="#166534">_token →</text>
+
+        <!-- Vault 2 -->
+        <rect x="669" y="10" width="230" height="130" rx="5" fill="#fff" stroke="#b8dfc8" stroke-width="1.5"/>
+        <rect x="669" y="10" width="230" height="22" rx="5" fill="#f0faf4" stroke="#b8dfc8" stroke-width="1.5"/>
+        <text x="784" y="26" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#166534">layered_vault2.db</text>
+        <text x="684" y="48" font-family="Space Grotesk" font-size="8" fill="#4a4a46" font-weight="500">Plaintext</text>
+        <text x="684" y="62" font-family="Space Grotesk" font-size="8" fill="#8a8a84">first_name · ssn · mrn · patient_id</text>
+        <text x="684" y="80" font-family="Space Grotesk" font-size="8" fill="#1d4ed8" font-weight="500">Tokens</text>
+        <text x="684" y="94" font-family="Space Grotesk" font-size="8" fill="#8a8a84">patient_id_token · first_name_token</text>
+        <text x="684" y="108" font-family="Space Grotesk" font-size="8" fill="#8a8a84">mrn_token · last4_ssn_plain</text>
+
+        <!-- Arrow to result -->
+        <line x1="899" y1="75" x2="930" y2="75" stroke="#166534" stroke-width="1.5" marker-end="url(#l-arr)"/>
+
+        <!-- Result -->
+        <rect x="935" y="30" width="60" height="90" rx="4" fill="#f0faf4" stroke="#166534" stroke-width="1.5"/>
+        <text x="965" y="58" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#166534">Full</text>
+        <text x="965" y="72" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#166534">record</text>
+        <text x="965" y="86" text-anchor="middle" font-family="Space Grotesk" font-size="8" fill="#166534">assembled</text>
+        <text x="965" y="100" text-anchor="middle" font-family="Space Grotesk" font-size="7.5" fill="#8a8a84">3 DB breach</text>
+        <text x="965" y="112" text-anchor="middle" font-family="Space Grotesk" font-size="7.5" fill="#8a8a84">required</text>
+      </svg>
+    </div>
+
+    <div class="attacker-row">
+      <div class="attacker-row-label">What the attacker sees — per database breach</div>
+      <div class="layered-attacker-grid">
+        <div>
+          <div class="layered-db-label">layered_vault1.db</div>
+          <div class="field-row">
+            <span class="field-cat">Plaintext</span>
+            <span class="field-items">last_name</span>
+            <span class="field-tag tag-plain">plaintext</span>
+          </div>
+          <div class="field-row">
+            <span class="field-cat">Hashes</span>
+            <span class="field-items">last4_ssn_hash</span>
+            <span class="field-tag tag-hash">crackable (4 digits)</span>
+          </div>
+          <div class="field-row">
+            <span class="field-cat">Tokens</span>
+            <span class="field-items">last_name_token, last4_ssn_token</span>
+            <span class="field-tag tag-token">not crackable</span>
+          </div>
+        </div>
+        <div>
+          <div class="layered-db-label">layered_link.db</div>
+          <div class="field-row">
+            <span class="field-cat">Plaintext</span>
+            <span class="field-items">dob</span>
+            <span class="field-tag tag-plain">plaintext</span>
+          </div>
+          <div class="field-row">
+            <span class="field-cat">Hashes</span>
+            <span class="field-items">last4_ssn_hash</span>
+            <span class="field-tag tag-hash">crackable (4 digits)</span>
+          </div>
+          <div class="field-row">
+            <span class="field-cat">Tokens</span>
+            <span class="field-items">last4_ssn_token, patient_id_token</span>
+            <span class="field-tag tag-token">not crackable</span>
+          </div>
+        </div>
+        <div>
+          <div class="layered-db-label">layered_vault2.db</div>
+          <div class="field-row">
+            <span class="field-cat">Plaintext</span>
+            <span class="field-items">patient_id, first_name, ssn, last4_ssn, mrn</span>
+            <span class="field-tag tag-plain">plaintext</span>
+          </div>
+          <div class="field-row">
+            <span class="field-cat">Tokens</span>
+            <span class="field-items">patient_id_token, first_name_token, mrn_token</span>
+            <span class="field-tag tag-token">not crackable</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-block green">
+      Patient data is deliberately distributed across three physically isolated databases. No single breach yields a complete or immediately exploitable record. An attacker must simultaneously compromise all three databases and successfully traverse the full token chain — Vault 1 to Link DB to Vault 2 — to reconstruct a full patient identity. Each database in isolation contains only a fragment of the picture, connected to the others exclusively through opaque CSPRNG tokens that carry no structural relationship to any patient identifier.
+    </div>
+  </div>
+
+  <!-- ═══ SUMMARY TABLE ═══ -->
+  <div class="summary-section">
+    <div class="summary-label">Summary — Attacker outcome per database breach</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Database</th>
+          <th>Pipeline</th>
+          <th>Direct Read</th>
+          <th>Hash Crackable</th>
+          <th>DBs for Full Record</th>
+          <th>Attacker Outcome</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>hashing.db</td>
+          <td>Direct Hashing</td>
+          <td><span class="tpill tpill-red">No</span></td>
+          <td><span class="tpill tpill-red">Yes — seconds</span></td>
+          <td>1 of 1</td>
+          <td><span class="tpill tpill-red">Full SSN recovery</span></td>
+        </tr>
+        <tr>
+          <td>token_vault.db</td>
+          <td>Tokenization</td>
+          <td><span class="tpill tpill-red">Yes — plaintext</span></td>
+          <td><span class="tpill tpill-blue">N/A</span></td>
+          <td>1 of 1</td>
+          <td><span class="tpill tpill-red">Total exposure</span></td>
+        </tr>
+        <tr>
+          <td>layered_vault1.db</td>
+          <td>Layered</td>
+          <td><span class="tpill tpill-amber">Last name + tokens</span></td>
+          <td><span class="tpill tpill-amber">Last 4 SSN only</span></td>
+          <td>3 of 3</td>
+          <td><span class="tpill tpill-green">Incomplete — 1 of 3 databases</span></td>
+        </tr>
+        <tr>
+          <td>layered_link.db</td>
+          <td>Layered</td>
+          <td><span class="tpill tpill-amber">DOB + tokens</span></td>
+          <td><span class="tpill tpill-amber">Last 4 SSN only</span></td>
+          <td>3 of 3</td>
+          <td><span class="tpill tpill-green">Incomplete — 1 of 3 databases</span></td>
+        </tr>
+        <tr>
+          <td>layered_vault2.db</td>
+          <td>Layered</td>
+          <td><span class="tpill tpill-amber">SSN + first name + MRN</span></td>
+          <td><span class="tpill tpill-blue">N/A</span></td>
+          <td>3 of 3</td>
+          <td><span class="tpill tpill-green">Incomplete — 1 of 3 databases</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

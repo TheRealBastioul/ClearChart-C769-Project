@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearChart PII Protection Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1117; color: #e0e0e0; min-height: 100vh; padding: 2rem; }
+    h1 { text-align: center; color: #00d4ff; font-size: 1.8rem; margin-bottom: 0.4rem; letter-spacing: 1px; }
+    .subtitle { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto; }
+    .card { background: #1a1d2e; border: 1px solid #2a2d3e; border-radius: 10px; padding: 1.5rem; }
+    .card h2 { color: #00d4ff; font-size: 1rem; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #2a2d3e; padding-bottom: 0.6rem; }
+    label { display: block; font-size: 0.78rem; color: #aaa; margin-bottom: 0.25rem; margin-top: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select { width: 100%; background: #0f1117; border: 1px solid #2a2d3e; border-radius: 6px; color: #e0e0e0; padding: 0.55rem 0.75rem; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus { border-color: #00d4ff; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    button { margin-top: 1.2rem; width: 100%; padding: 0.65rem; background: #00d4ff; color: #0f1117; border: none; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #00b8d9; }
+    .status { margin-top: 0.9rem; font-size: 0.82rem; min-height: 1.2rem; }
+    .status.success { color: #4caf50; }
+    .status.error { color: #f44336; }
+    .results-area { margin-top: 1rem; max-height: 460px; overflow-y: auto; }
+    .record { background: #0f1117; border: 1px solid #2a2d3e; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; font-size: 0.78rem; font-family: 'Courier New', monospace; }
+    .field { display: flex; gap: 0.5rem; margin-bottom: 0.3rem; flex-wrap: wrap; }
+    .field-key { color: #00d4ff; min-width: 160px; flex-shrink: 0; }
+    .field-val { color: #e0e0e0; word-break: break-all; }
+    .pipeline-label { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 4px; margin-bottom: 0.6rem; font-weight: 700; letter-spacing: 0.5px; }
+    .label-hashing { background: #b71c1c; color: #fff; }
+    .label-token { background: #1565c0; color: #fff; }
+    .label-layered { background: #4a148c; color: #fff; }
+    .pipeline-desc { font-size: 0.78rem; color: #666; margin-top: 0.4rem; line-height: 1.5; min-height: 2.8rem; }
+    .query-fields { display: none; }
+    .query-fields.active { display: block; }
+    .divider { border: none; border-top: 1px solid #2a2d3e; margin: 1rem 0; }
+    .empty { color: #555; font-size: 0.85rem; text-align: center; padding: 1.5rem 0; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2a2d3e; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<h1>ClearChart PII Protection Architecture</h1>
+<p class="subtitle">Proof of concept demo — all data is entirely synthetic</p>
+
+<div class="grid">
+
+  <div class="card">
+    <h2>Patient Intake Form</h2>
+    <label>Medical Record Number (MRN)</label>
+    <input type="text" id="mrn" placeholder="e.g. MRN123456" maxlength="20" />
+    <div class="input-row">
+      <div>
+        <label>First Name</label>
+        <input type="text" id="first_name" placeholder="e.g. Jane" maxlength="50" />
+      </div>
+      <div>
+        <label>Last Name</label>
+        <input type="text" id="last_name" placeholder="e.g. Doe" maxlength="50" />
+      </div>
+    </div>
+    <label>Date of Birth</label>
+    <input type="date" id="dob" />
+    <label>Social Security Number</label>
+    <input type="text" id="ssn" placeholder="e.g. 900-55-1234" maxlength="11" />
+    <button onclick="submitForm()">Submit Patient Record</button>
+    <div class="status" id="submit-status"></div>
+  </div>
+
+  <div class="card">
+    <h2>Query Patient Record</h2>
+
+    <label>Select Pipeline</label>
+    <select id="pipeline" onchange="updateQueryFields()">
+      <option value="hashing">Hashing Pipeline</option>
+      <option value="tokenization">Tokenization Pipeline</option>
+      <option value="layered">Layered Pipeline</option>
+    </select>
+    <p class="pipeline-desc" id="pipeline-desc">
+      Hashes your input and compares against stored hashes. Demonstrates why low-entropy fields like SSN last 4 are trivially recoverable.
+    </p>
+
+    <hr class="divider" />
+
+    <!-- All pipelines use the same two inputs -->
+    <label>Last Name</label>
+    <input type="text" id="query-last-name" placeholder="e.g. Doe" maxlength="50" />
+    <label>Last 4 of SSN</label>
+    <input type="text" id="query-ssn4" placeholder="e.g. 1234" maxlength="4" />
+
+    <button onclick="queryDB()">Search</button>
+    <div class="status" id="query-status"></div>
+    <div class="results-area" id="results"></div>
+  </div>
+
+</div>
+
+<script>
+  const descriptions = {
+    hashing:      "Hashes your input and compares against stored hashes. Demonstrates why low-entropy fields like SSN last 4 are trivially recoverable in a direct hashing system.",
+    tokenization: "Searches the token vault by plaintext MRN or SSN. The vault holds both tokens and originals. The application layer would never have direct vault access in production.",
+    layered:      "Three-database query chain: Last name + SSN last 4 resolve in Vault 1 to a tokenized MRN, which resolves in Hash DB to a hashed patient ID token, which resolves in Vault 2 to the full patient record."
+  };
+
+  function updateQueryFields() {
+    const p = document.getElementById("pipeline").value;
+    document.getElementById("pipeline-desc").textContent = descriptions[p];
+  }
+
+  function setStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = "status " + type;
+  }
+
+  function formatSSN(value) {
+    // Strip everything except digits, then format as ###-##-####
+    const digits = value.replace(/\D/g, "");
+    if (digits.length !== 9) return null;
+    return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5,9)}`;
+  }
+
+  async function submitForm() {
+    const mrn        = document.getElementById("mrn").value.trim();
+    const first_name = document.getElementById("first_name").value.trim();
+    const last_name  = document.getElementById("last_name").value.trim();
+    const dob        = document.getElementById("dob").value.trim();
+    const ssnRaw     = document.getElementById("ssn").value.trim();
+
+    if (!mrn || !first_name || !last_name || !dob || !ssnRaw) {
+      setStatus("submit-status", "All fields are required.", "error");
+      return;
+    }
+    if (!dob) {
+      setStatus("submit-status", "Please select a date of birth.", "error");
+      return;
+    }
+    const dobDate = new Date(dob);
+    if (isNaN(dobDate.getTime()) || dobDate > new Date()) {
+      setStatus("submit-status", "Date of birth cannot be a future date.", "error");
+      return;
+    }
+    if (!/^\d{6,}$/.test(mrn)) {
+      setStatus("submit-status", "MRN must be at least 6 digits, numbers only.", "error");
+      return;
+    }
+    if (!/^[A-Za-z\s\-]+$/.test(first_name)) {
+      setStatus("submit-status", "First name must contain letters only.", "error");
+      return;
+    }
+    if (!/^[A-Za-z\s\-]+$/.test(last_name)) {
+      setStatus("submit-status", "Last name must contain letters only.", "error");
+      return;
+    }
+    const ssn = formatSSN(ssnRaw);
+    if (!ssn) {
+      setStatus("submit-status", "SSN must be exactly 9 digits (e.g. 900-55-1234 or 900551234).", "error");
+      return;
+    }
+
+    setStatus("submit-status", "Submitting...", "");
+    try {
+      const res  = await fetch("/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mrn, first_name, last_name, dob, ssn })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus("submit-status", `Record created. Patient ID: ${data.patient_id}`, "success");
+        ["mrn","first_name","last_name","dob","ssn"].forEach(id => document.getElementById(id).value = "");
+      } else {
+        setStatus("submit-status", data.error || "Submission failed.", "error");
+      }
+    } catch (e) {
+      setStatus("submit-status", "Could not reach server.", "error");
+    }
+  }
+
+  async function queryDB() {
+    const pipeline  = document.getElementById("pipeline").value;
+    const last_name = document.getElementById("query-last-name").value.trim();
+    const ssn_last4 = document.getElementById("query-ssn4").value.trim();
+    const container = document.getElementById("results");
+    container.innerHTML = "";
+    setStatus("query-status", "Searching...", "");
+
+    if (!last_name || !ssn_last4) {
+      setStatus("query-status", "Last name and last 4 of SSN are required.", "error");
+      return;
+    }
+    if (!/^\d{4}$/.test(ssn_last4)) {
+      setStatus("query-status", "Last 4 of SSN must be exactly 4 digits.", "error");
+      return;
+    }
+
+    const params = new URLSearchParams({ pipeline, last_name, ssn_last4 });
+
+    try {
+      const res  = await fetch(`/query?${params}`);
+      const data = await res.json();
+
+      if (data.error) {
+        setStatus("query-status", data.error, "error");
+        return;
+      }
+
+      const rows = Array.isArray(data) ? data : [];
+      if (rows.length === 0) {
+        setStatus("query-status", "No matching record found.", "error");
+        container.innerHTML = '<p class="empty">No results.</p>';
+        return;
+      }
+
+      const labelMap = {
+        hashing:      ["HASHING PIPELINE",      "label-hashing"],
+        tokenization: ["TOKENIZATION PIPELINE",  "label-token"],
+        layered:      ["LAYERED PIPELINE",        "label-layered"]
+      };
+
+      setStatus("query-status", `${rows.length} record(s) found.`, "success");
+      rows.forEach(row => {
+        const [name, cls] = labelMap[pipeline];
+        container.appendChild(renderRecord(row, name, cls));
+      });
+    } catch (e) {
+      setStatus("query-status", "Could not reach server.", "error");
+    }
+  }
+
+  function renderRecord(row, labelName, labelClass) {
+    const card = document.createElement("div");
+    card.className = "record";
+    const badge = document.createElement("div");
+    badge.className = `pipeline-label ${labelClass}`;
+    badge.textContent = labelName;
+    card.appendChild(badge);
+    Object.entries(row).forEach(([key, val]) => {
+      const field = document.createElement("div");
+      field.className = "field";
+      const keySpan = document.createElement("span");
+      keySpan.className = "field-key";
+      keySpan.textContent = key;
+      const valSpan = document.createElement("span");
+      valSpan.className = "field-val";
+      valSpan.textContent = val;
+      field.appendChild(keySpan);
+      field.appendChild(valSpan);
+      card.appendChild(field);
+    });
+    return card;
+  }
+</script>
+
+</body>
+</html>
