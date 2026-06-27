@@ -177,8 +177,8 @@ flowchart TD
     WHERE patient_id_token = token from Link DB"]
 
     ASSEMBLE["Full record assembled
-    last_name: Vault 1
-    dob: Link DB
+    last_name: vault1.db
+    dob: link.db
     ssn + mrn + first_name: Vault 2"]
 
     USER --> V1Q --> V1R --> LDBQ --> LDBR --> V2Q --> ASSEMBLE
@@ -187,7 +187,7 @@ flowchart TD
 **Breach exposure per database:**
 - Vault 1: last name + partial SSN hash only
 - Link DB: DOB + opaque tokens, no name or SSN
-- Vault 2: SSN + MRN + first name, dead end without Link DB token
+- Vault 2: SSN + MRN + first name, dead end without link.db token
 
 ---
 
